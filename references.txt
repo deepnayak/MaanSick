@@ -1,0 +1,3 @@
+Run 1 and Run 2 Link: https://openneuro.org/datasets/ds002087/versions/1.0.0
+Data smooth and mask Code Link: https://dipy.org/documentation/1.4.0./examples_built/reconst_dti/
+Eigen Vals, Vecs, FA, RD, MD, AD from DT Link: https://dipy.org/documentation/1.4.0./reference/dipy.reconst/#dipy.reconst.dti.TensorFit
