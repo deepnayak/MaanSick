@@ -18,19 +18,23 @@ data, affine = load_nifti(nii_file)
 bvals, bvecs = read_bvals_bvecs(bval_file, bvec_file)
 gtab = gradient_table(bvals, bvecs)
 
-maskdata, mask = median_otsu(data, vol_idx=[0, 1], median_radius=4, numpass=2,autocrop=False, dilate=1)
+# First of all, we mask and crop the data. This is a quick way to avoid calculating Tensors on the background of the image. This is done using DIPY’s mask module.
+maskdata, mask = median_otsu(data, vol_idx=range(10, 50), median_radius=3, numpass=1, autocrop=True, dilate=2)
 
-fwhm = 1.25
-gauss_std = fwhm / np.sqrt(8 * np.log(2))  # converting fwhm to Gaussian std
-data_smooth = np.zeros(data.shape)
-for v in range(data.shape[-1]):
-    data_smooth[..., v] = gaussian_filter(data[..., v], sigma=gauss_std)
-                  
+# Now that we have prepared the datasets we can go forward with the voxel reconstruction. First, we instantiate the Tensor model in the following way.
 tenmodel = dti.TensorModel(gtab)
-tenfit = tenmodel.fit(data_smooth, mask=mask)
+
+# Fitting the data is very simple. We just need to call the fit method of the TensorModel in the following way:
+tenfit = tenmodel.fit(maskdata, mask=mask)
+
+# qf is the tensor that contains the diffusion matrix for each voxel in the 3D space
 qf = tenfit.quadratic_form
 print(qf.shape)
+
+# Eigen Values and Vectors
 eigvals, eigvecs = dti.decompose_tensor(qf)
+
+# Diffusion metrics
 fa = tenfit.fa
 md = tenfit.md
 rd = tenfit.rd
