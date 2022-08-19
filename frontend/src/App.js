@@ -1,74 +1,44 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import medical_image_preview from "./assets/medical_image_preview.jpg";
-import "./App.css";
-function App() {
-  const [selectedFile, setSelectedFile] = useState("");
-  const [nonDicomImg, setNonDicomImg] = useState(false);
+import React, { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 
-  const params = useMemo(() => {
-    const p = [];
-    p["kioskMode"] = true;
-    return p;
-  }, []);
+import "aos/dist/aos.css";
+import "./css/style.css";
+
+import AOS from "aos";
+
+import Home from "./pages/Home";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ResetPassword from "./pages/ResetPassword";
+import MRIViewer from "./components/MRIViewer";
+
+function App() {
+  const location = useLocation();
 
   useEffect(() => {
-    window.papaya.Container.startPapaya();
-    window.papaya.Container.resetViewer(0, params);
-  }, [params]);
+    AOS.init({
+      once: true,
+      disable: "phone",
+      duration: 700,
+      easing: "ease-out-cubic",
+    });
+  });
 
-  const updateImage = useCallback(
-    (_event) => {
-      _event.preventDefault();
-
-      if (selectedFile.type.startsWith("image")) {
-        setNonDicomImg(true);
-      } else {
-        setNonDicomImg(false);
-      }
-
-      try {
-        params["images"] = [URL.createObjectURL(selectedFile)];
-        window.papaya.Container.resetViewer(0, params);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [params, selectedFile]
-  );
-
-  const selectFile = useCallback((e) => setSelectedFile(e.target.files[0]), []);
-
-  const handleURLExpired = useCallback((e) => {
-    e.target.onerror = null;
-    e.target.src = medical_image_preview;
-  }, []);
+  useEffect(() => {
+    document.querySelector("html").style.scrollBehavior = "auto";
+    window.scroll({ top: 0 });
+    document.querySelector("html").style.scrollBehavior = "";
+  }, [location.pathname]); // triggered on route change
 
   return (
-    <div className="bg-red-300">
-      <div className="text-3xl font-bold underline bg-red-300">Hello!</div>
-      <div style={{ width: "800px", marginTop: "10px" }}>
-        <div id="papaya_viewer" class="papaya" hidden={nonDicomImg}></div>
-        {!!selectedFile && !!nonDicomImg && (
-          <img
-            alt="Medical file preview"
-            src={URL.createObjectURL(selectedFile)}
-            style={{ width: "800px", height: "600px", objectFit: "contain" }}
-            onError={handleURLExpired}
-          />
-        )}
-        <br />
-
-        <form style={{ margin: "10px" }} onSubmit={updateImage}>
-          <label style={{ fontFamily: "monospace" }}>
-            <h3>Upload file:</h3>
-            <input required type="file" onChange={selectFile} />
-          </label>
-          <br />
-          <button type="submit" style={{ marginTop: "10px" }}>
-            Visualize image
-          </button>
-        </form>
-      </div>
+    <div className="font-inter antialiased bg-white text-gray-900 tracking-tight">
+      <Routes>
+        <Route exact path="/" element={<Home />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/mri" element={<MRIViewer />} />
+      </Routes>
     </div>
   );
 }
