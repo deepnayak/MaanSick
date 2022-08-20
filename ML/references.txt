@@ -1,0 +1,6 @@
+Run 1 and Run 2 Link: https://openneuro.org/datasets/ds002087/versions/1.0.0
+Mask and Fit tensor model Code: https://dipy.org/documentation/1.4.0./examples_built/reconst_dti/
+Data smooth and mask Code Link:https://dipy.org/documentation/1.1.1./examples_built/reconst_dki/
+Eigen Vals, Vecs, FA, RD, MD, AD from DT Link: https://dipy.org/documentation/1.4.0./reference/dipy.reconst/#dipy.reconst.dti.TensorFit
+Dataset Link(.csv and .tar.gz): https://www.nitrc.org/frs/?group_id=835
+Saving fa images (with or w/o color) in nii.gz file format: https://dipy.org/documentation/1.0.0./examples_built/reconst_dti/
