@@ -4,7 +4,7 @@ import math
 from crop import crop
 
 # file = crop("dep_out_data_zoom.npy")
-file = "pd_out_data_zoom.npy"
+file = ""
 
 # print(file)
 fa_and_pd_new = np.load(file, allow_pickle=True)
