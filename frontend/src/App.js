@@ -11,7 +11,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
 import MRIViewer from "./components/MRIViewer";
-
+import MRIStory from "./pages/MRIStory";
 function App() {
   const location = useLocation();
 
@@ -31,13 +31,14 @@ function App() {
   }, [location.pathname]); // triggered on route change
 
   return (
-    <div className="font-inter antialiased bg-white text-gray-900 tracking-tight">
+    <div className="bg-gradient-to-tr from-blue-900 via-slate-900 to-black h-screen overflow-hidden z-0 text-white">
       <Routes>
         <Route exact path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/mri" element={<MRIViewer />} />
+        <Route path="/mri-stages" element={<MRIStory/>}/>
       </Routes>
     </div>
   );
