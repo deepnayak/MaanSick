@@ -11,6 +11,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
 import MRIViewer from "./components/MRIViewer";
+import ThreeModel from "./components/ThreeModel";
 
 function App() {
   const location = useLocation();
@@ -38,6 +39,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/mri" element={<MRIViewer />} />
+        <Route path="/three" element={<ThreeModel />} />
       </Routes>
     </div>
   );
