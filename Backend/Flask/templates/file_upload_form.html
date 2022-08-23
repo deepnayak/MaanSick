@@ -3,9 +3,11 @@
     <title>upload</title>  
 </head>  
 <body>  
-    <form action = "/success" method = "post" enctype="multipart/form-data">  
-        <input type="file" name="file" />  
+    <form action = "/evaluate" method = "post" enctype="multipart/form-data">  
+        <input type="file" name="nii" />  
+        <input type="file" name="bval" />  
+        <input type="file" name="bvec" />  
         <input type = "submit" value="Upload">  
-    </form>  
+    </form>    
 </body>  
 </html>  
