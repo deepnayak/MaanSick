@@ -25,6 +25,7 @@ import tensorflow as tf
 from PIL import Image, ImageOps
 import nibabel as nib
 import matplotlib.pyplot as plt
+import threading
 
 from .dtiprocess import dti_process
 
@@ -34,41 +35,9 @@ successive_outputs = [layer.output for layer in model.layers]
 visualization_model = tf.keras.models.Model(inputs = model.input, outputs = successive_outputs)
 
 class CNN:
-    
-    def dti_process(nii_file,bval_file,bvec_file):
-        data, affine = load_nifti(nii_file)
-        bvals, bvecs = read_bvals_bvecs(bval_file, bvec_file)
-        gtab = gradient_table(bvals, bvecs)
 
-        # First of all, we mask and crop the data. This is a quick way to avoid calculating Tensors on the background of the image. This is done using DIPY’s mask module.
-        maskdata, mask = median_otsu(data, vol_idx=range(10, 50), median_radius=3, numpass=1, autocrop=True, dilate=2)
-
-        # Now that we have prepared the datasets we can go forward with the voxel reconstruction. First, we instantiate the Tensor model in the following way.
-        tenmodel = dti.TensorModel(gtab)
-        # print(gtab)
-
-        # Fitting the data is very simple. We just need to call the fit method of the TensorModel in the following way:
-        tenfit = tenmodel.fit(maskdata, mask=mask)
-
-        # qf is the tensor that contains the diffusion matrix for each voxel in the 3D space
-        qf = tenfit.quadratic_form
-        # print(qf.shape)
-
-        # Eigen Values and Vectors
-        eigvals, eigvecs = dti.decompose_tensor(qf)
-
-        # Diffusion metrics
-        fa = tenfit.fa
-        md = tenfit.md
-        rd = tenfit.rd
-        ad = tenfit.ad
-        # print(fa.shape,md.shape,rd.shape,ad.shape)
-        fa_img = nib.Nifti1Image(fa.astype(np.float32), affine)
-        nib.save(fa_img, 'tensor_fa.nii.gz')
-        return fa,md,rd,ad
-
-    def processNiiFile(niiFile, bvecFile, bvalFile):
-        fa, md, rd, ad = [zoom(x, (50/x.shape[0], 50/x.shape[1], 50/x.shape[2])) for x in dti_process(niiFile, bvecFile, bvalFile)]
+    def processNiiFile(parameterList, niiFile):
+        fa, md, rd, ad = [zoom(x, (50/x.shape[0], 50/x.shape[1], 50/x.shape[2])) for x in parameterList]
 
         inputMat = np.moveaxis(np.array([fa]), 0, -1)
 
@@ -79,10 +48,13 @@ class CNN:
                 newImages = np.moveaxis(patient, -1, 0)
                 data, affine = load_nifti(niiFile)
                 for x in range(4):
+                    if i == 7:
+                        fa_img = nib.Nifti1Image(newImages[x].astype(np.float32), affine)
+                        nib.save(fa_img, f'tempNii/{niiFile}_{i}_{x}.nii.gz')
                     if x == 3:
                         fa_img = nib.Nifti1Image(newImages[x].astype(np.float32), affine)
-                        nib.save(fa_img, f'tensor_fa50_{i}_{x}.nii.gz')
-                        twoDimage = nib.load(f"tensor_fa50_{i}_{x}.nii.gz").get_fdata()
+                        nib.save(fa_img, f'tempNii/{niiFile}_{i}_{x}.nii.gz')
+                        twoDimage = nib.load(f"tempNii/{niiFile}_{i}_{x}.nii.gz").get_fdata()
                         # twoDimage = np.array(fa_img.slicer[0:1])
                         twoDimage = zoom(twoDimage[:, 30, :], (20, 20))
                         # twoDimage = np.moveaxis(twoDimage, -1, 0)
@@ -91,7 +63,7 @@ class CNN:
                         rescaled = (255.0 / twoDimage.max() * (twoDimage - twoDimage.min())).astype(np.uint8)
 
                         im = Image.fromarray(rescaled)
-                        im.save(f"tensor_fa50_{i}_{x}.png")
+                        im.save(f"images/{niiFile}_{i}_{x}.png")
                         
                         # plt.imshow(twoDimage[0])
                         # plt.show()
@@ -130,4 +102,6 @@ class DepPredict:
         # fa, md, rd, ad = dti_process("./model/p07677_bmatrix_1000.nii.gz", "./model/p07677_bval_1000", "./model/p07677_grad_1000")
 
         newProcessedData = self.processData(np.array(fa))
+        t1 = threading.Thread(target=CNN.processNiiFile, args=([fa, md, rd, ad], nii_file))
+        t1.start()
         return self.model.predict(newProcessedData)
