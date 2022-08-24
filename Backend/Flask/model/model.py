@@ -8,7 +8,6 @@ import scipy.interpolate as interp
 from scipy.ndimage import zoom
 
 import numpy as np
-import numpy as np
 import matplotlib.pyplot as plt
 import dipy.reconst.dki as dki
 import dipy.reconst.dti as dti
@@ -30,13 +29,33 @@ import threading
 from .dtiprocess import dti_process
 
 # Importing model and initializing visualization model
-model = tf.keras.models.load_model("cnnBrainDepressionBest")
+model = tf.keras.models.load_model("./model/cnnBrainDepressionBest")
 successive_outputs = [layer.output for layer in model.layers]
 visualization_model = tf.keras.models.Model(inputs = model.input, outputs = successive_outputs)
 
 class CNN:
+    def depression_quadrant(self, fileName):
+        q_outs = [0,0,0,0]
+        files = [f"./static/tempNii/{fileName}_7_{x}.nii.gz" for x in range(4)]
+        for nii_file in files:
+            data, affine = load_nifti(nii_file)
+            quads = data[:25,:25], data[:25,25:], data[25:,25:], data[25:,:25]
+            qsums = [quad.sum() for quad in quads]
+            q_outs[qsums.index(max(qsums))] +=1
 
-    def processNiiFile(parameterList, niiFile):
+        quad_dict = {
+            0: {"quad": "A","suggestions": ["Logical", "Analytical", "Fact Based", "Quantitative"],"diseases": [],"suggestions": [],"lobes": []},
+            1: {"quad": "B","functions": ["Sequential", "Organized", "Detailed", "Planned"],"diseases": [],"suggestions": [],"lobes": []},
+            2: {"quad": "C","suggestions": ["Holistic", "Intuitive", "Integrating", "Synthesising"],"diseases": [], "suggestions": [], "lobes": []},
+            3: {"quad": "D","suggestions": ["Interpersonal", "Feeling Based", "Kinesthetic", "Emotional"],"diseases": [],"suggestions": [],"lobes": []}
+        }
+
+        dep_quad = q_outs.index(max(q_outs))
+        output = quad_dict[dep_quad]
+
+        return output
+
+    def processNiiFile(self, parameterList, niiFile):
         fa, md, rd, ad = [zoom(x, (50/x.shape[0], 50/x.shape[1], 50/x.shape[2])) for x in parameterList]
 
         inputMat = np.moveaxis(np.array([fa]), 0, -1)
@@ -50,11 +69,11 @@ class CNN:
                 for x in range(4):
                     if i == 7:
                         fa_img = nib.Nifti1Image(newImages[x].astype(np.float32), affine)
-                        nib.save(fa_img, f'tempNii/{niiFile}_{i}_{x}.nii.gz')
+                        nib.save(fa_img, f'./static/tempNii/{niiFile}_{i}_{x}.nii.gz')
                     if x == 3:
                         fa_img = nib.Nifti1Image(newImages[x].astype(np.float32), affine)
-                        nib.save(fa_img, f'tempNii/{niiFile}_{i}_{x}.nii.gz')
-                        twoDimage = nib.load(f"tempNii/{niiFile}_{i}_{x}.nii.gz").get_fdata()
+                        nib.save(fa_img, f'./static/tempNii/{niiFile}_{i}_{x}.nii.gz')
+                        twoDimage = nib.load(f"./static/tempNii/{niiFile}_{i}_{x}.nii.gz").get_fdata()
                         # twoDimage = np.array(fa_img.slicer[0:1])
                         twoDimage = zoom(twoDimage[:, 30, :], (20, 20))
                         # twoDimage = np.moveaxis(twoDimage, -1, 0)
@@ -63,11 +82,12 @@ class CNN:
                         rescaled = (255.0 / twoDimage.max() * (twoDimage - twoDimage.min())).astype(np.uint8)
 
                         im = Image.fromarray(rescaled)
-                        im.save(f"images/{niiFile}_{i}_{x}.png")
+                        im.save(f"./static/images/{niiFile}_{i}_{x}.png")
                         
                         # plt.imshow(twoDimage[0])
                         # plt.show()
                 break
+
 
 
 class DepPredict:
