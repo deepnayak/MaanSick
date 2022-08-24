@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import medical_image_preview from "../assets/medical_image_preview.jpg";
 
-const MRIViewer = () => {
+const   MRIViewer = () => {
   const [selectedFile, setSelectedFile] = useState("");
   const [nonDicomImg, setNonDicomImg] = useState(false);
 

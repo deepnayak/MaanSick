@@ -32,7 +32,7 @@ function App() {
   }, [location.pathname]); // triggered on route change
 
   return (
-    <div className="font-inter antialiased bg-white text-gray-900 tracking-tight">
+    <div className="bg-gradient-to-tr from-blue-900 via-slate-900 to-black h-screen overflow-hidden z-0 text-white">
       <Routes>
         <Route exact path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
