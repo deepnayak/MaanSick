@@ -29,7 +29,7 @@ import threading
 from .dtiprocess import dti_process
 
 # Importing model and initializing visualization model
-model = tf.keras.models.load_model("./model/cnnBrainDepressionBest")
+model = tf.keras.models.load_model("./model/cnnBrainDepressionBest/")
 successive_outputs = [layer.output for layer in model.layers]
 visualization_model = tf.keras.models.Model(inputs = model.input, outputs = successive_outputs)
 
@@ -56,6 +56,7 @@ class CNN:
         return output
 
     def processNiiFile(self, parameterList, niiFile):
+        print("HiHiHaha ", niiFile)
         fa, md, rd, ad = [zoom(x, (50/x.shape[0], 50/x.shape[1], 50/x.shape[2])) for x in parameterList]
 
         inputMat = np.moveaxis(np.array([fa]), 0, -1)
@@ -65,7 +66,7 @@ class CNN:
         for i in [0, 2, 4, 7]:
             for patient in successive_feature_maps[i]:
                 newImages = np.moveaxis(patient, -1, 0)
-                data, affine = load_nifti(niiFile)
+                data, affine = load_nifti("./model/"+niiFile)
                 for x in range(4):
                     if i == 7:
                         fa_img = nib.Nifti1Image(newImages[x].astype(np.float32), affine)
@@ -122,6 +123,6 @@ class DepPredict:
         # fa, md, rd, ad = dti_process("./model/p07677_bmatrix_1000.nii.gz", "./model/p07677_bval_1000", "./model/p07677_grad_1000")
 
         newProcessedData = self.processData(np.array(fa))
-        t1 = threading.Thread(target=CNN.processNiiFile, args=([fa, md, rd, ad], nii_file))
+        t1 = threading.Thread(target=CNN.processNiiFile, args=(CNN(),[fa, md, rd, ad], nii_file))
         t1.start()
         return self.model.predict(newProcessedData)
