@@ -31,12 +31,16 @@ def evaluate():
         bvec.save("./model/" + bvec.filename)
         output = depPredict.prediction(nii.filename, bval.filename, bvec.filename)
         print(output)
-        status = "NO"
-        if output[0] == 1:
-            status = "YES"    
+        if(output[0][0]>output[0][1]):
+            score = output[0][0]*100
+            status = "NO"
+        else:
+            score = output[0][1]*100
+            status = "YES"
 
         return jsonify({
-            "output":status,
+            "score":score,
+            "status":status
         }) 
 
 @app.route('/carousel', methods = ['GET'])

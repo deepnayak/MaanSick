@@ -93,7 +93,7 @@ class CNN:
 
 class DepPredict:
     def __init__(self):
-        self.filename = './model/svm_model_dep_zoom.sav'
+        self.filename = './model/svm_model_dep_zoom_cross_val.sav'
         self.model = pickle.load(open(self.filename, 'rb'))
         self.ref_model_size = 235415
         self.minimumDimension = 100000
@@ -125,4 +125,4 @@ class DepPredict:
         newProcessedData = self.processData(np.array(fa))
         t1 = threading.Thread(target=CNN.processNiiFile, args=(CNN(),[fa, md, rd, ad], nii_file))
         t1.start()
-        return self.model.predict(newProcessedData)
+        return self.model.predict_proba(newProcessedData)
