@@ -2,3 +2,4 @@ dataset/*
 ML/park4/*
 */*/*/variables
 ML/CNN/park4/*
+Backend/Flask/model/cnnBrainDepressionBest

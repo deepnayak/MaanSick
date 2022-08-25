@@ -2,11 +2,12 @@ from flask import *
 from model import model
 import sys
 import os
+from flask_cors import CORS
 sys.path.append("..")
 
 app = Flask(__name__)
+CORS(app)
 depPredict = model.DepPredict()
-# print(depPredict.prediction("1","2","3"))  
 cnn = model.CNN()
 @app.route('/')  
 def upload():  
@@ -17,7 +18,7 @@ def success():
     if request.method == 'POST':  
         f = request.files['file']  
         f.save(f.filename)  
-        return render_template("success.html", name = f.filename)  
+        return render_template("success.html", name = f.filename)
 
 @app.route('/evaluate', methods = ['POST'])
 def evaluate():
@@ -40,7 +41,7 @@ def evaluate():
 
         return jsonify({
             "score":score,
-            "status":status
+            "stat":status
         }) 
 
 @app.route('/carousel', methods = ['GET'])
@@ -50,15 +51,10 @@ def carousel():
             if not os.path.exists('static/images/'+file+".png"):
                 return jsonify({"output":"Carousel Images not found"})  
         files = [url_for('static', filename="images/"+file+".png") for file in files]
-        # print('url ', files)
-        # print('post data ', request.form['file'])
+
         quads = cnn.depression_quadrant(request.form['file'])
 
         return jsonify({"output":files,"quads":quads})   
 
-
-
-
-
 if __name__ == '__main__':  
-    app.run(host= '0.0.0.0', debug = True)  
+    app.run(host= '127.0.0.1', debug = True)  
