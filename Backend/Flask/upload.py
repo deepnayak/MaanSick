@@ -3,6 +3,7 @@ from model import model
 import sys
 import os
 from flask_cors import CORS
+# from math im
 sys.path.append("..")
 
 app = Flask(__name__)
@@ -33,10 +34,10 @@ def evaluate():
         output = depPredict.prediction(nii.filename, bval.filename, bvec.filename)
         print(output)
         if(output[0][0]>output[0][1]):
-            score = output[0][0]*100
+            score = round(output[0][0]*100, 2)
             status = "NO"
         else:
-            score = output[0][1]*100
+            score = round(output[0][1]*100, 2)
             status = "YES"
 
         return jsonify({
